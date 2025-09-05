@@ -60,7 +60,7 @@ class ActionButton extends StatelessWidget {
           SizedBox(width: 8.0),
           Text(
             viewModel.text,
-            style: TextStyle(fontSize: size),
+            style: textStyle.copyWith(fontSize: size),
           ),
         ],
       ),
