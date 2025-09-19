@@ -1,0 +1,7 @@
+[
+    {
+        "host": "https://api.clashroyale.com",
+        "origin": "https://api.clashroyale.com",
+        "proxy": true
+    }
+]
