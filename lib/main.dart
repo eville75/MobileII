@@ -1,5 +1,7 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
-import 'screens/welcome_screen.dart'; // Importação relativa
+import 'package:mobile/screens/sentiments_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const WelcomeScreen(),
+      home: const SentimentsScreen(),
     );
   }
 }
