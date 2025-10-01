@@ -1,13 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/playlist_model.dart';
 import '../data/theme/colors.dart';
-
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class PlaylistsScreen extends StatelessWidget {
-  final List<Playlist> playlists;
+class PlaylistsScreen extends StatefulWidget {
+  final String mood;
+  const PlaylistsScreen({super.key, required this.mood});
 
-  const PlaylistsScreen({super.key, required this.playlists});
+  @override
+  _PlaylistsScreenState createState() => _PlaylistsScreenState();
+}
+
+class _PlaylistsScreenState extends State<PlaylistsScreen> {
+  late Future<List<Playlist>> _playlistsFuture;
+  final String _youtubeApiKey = "AIzaSyDrafrqNdnxdjbnJHGwYGuZWAt1adaqokw";
+
+  @override
+  void initState() {
+    super.initState();
+    _playlistsFuture = _fetchPlaylists();
+  }
+
+  Future<List<Playlist>> _fetchPlaylists() async {
+    final response = await http.get(
+      Uri.parse(
+          'https://www.googleapis.com/youtube/v3/search?part=snippet&q=${widget.mood}+playlist&type=playlist&key=$_youtubeApiKey'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final List<dynamic> items = data['items'];
+      return items.map((item) {
+        return Playlist(
+          name: item['snippet']['title'],
+          mood: widget.mood,
+          url: "https://www.youtube.com/playlist?list=${item['id']['playlistId']}",
+          thumbnailUrl: item['snippet']['thumbnails']['high']['url'],
+        );
+      }).toList();
+    } else {
+      throw Exception('Erro ao carregar as playlists');
+    }
+  }
 
   Future<void> _launchUrl(String url) async {
     if (!await launchUrl(Uri.parse(url))) {
@@ -17,7 +53,6 @@ class PlaylistsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usaremos um widget para cada item da playlist para organizar o código
     Widget playlistCard(Playlist playlist) {
       return GestureDetector(
         onTap: () => _launchUrl(playlist.url),
@@ -30,10 +65,12 @@ class PlaylistsScreen extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  'https://i.scdn.co/image/ab67706c0000bebb9c148f95c02b5e282b8426ae', // Imagem de exemplo
+                  playlist.thumbnailUrl!,
                   height: 150,
                   width: 150,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.error, size: 150),
                 ),
               ),
               const SizedBox(height: 8),
@@ -61,61 +98,71 @@ class PlaylistsScreen extends StatelessWidget {
         ),
       );
     }
-
+    
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header (Boa noite)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Boa noite',
-                      style: TextStyle(
-                        color: AppColors.text,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+      body: FutureBuilder<List<Playlist>>(
+        future: _playlistsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Erro: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Nenhuma playlist encontrada.'));
+          } else {
+            final playlists = snapshot.data!;
+            return SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Playlists de ${widget.mood}',
+                            style: const TextStyle(
+                              color: AppColors.text,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.settings, color: AppColors.text),
+                            onPressed: () {},
+                          ),
+                        ],
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.settings, color: AppColors.text),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Seção de Playlists
-                Text(
-                  'Músicas para seu humor',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.text,
+                      const SizedBox(height: 24),
+                      Text(
+                        'Mixes para você',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.text,
+                            ),
                       ),
-                ),
-                const SizedBox(height: 16),
-                // Carrossel de playlists
-                SizedBox(
-                  height: 220, // Altura fixa para o carrossel
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: playlists.length,
-                    itemBuilder: (context, index) {
-                      return playlistCard(playlists[index]);
-                    },
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 220,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: playlists.length,
+                          itemBuilder: (context, index) {
+                            return playlistCard(playlists[index]);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
+              ),
+            );
+          }
+        },
       ),
-      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.card,
         type: BottomNavigationBarType.fixed,

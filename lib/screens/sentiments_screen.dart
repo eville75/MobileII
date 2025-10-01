@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/data/playlist_data.dart';
 import 'package:mobile/data/sentiment_data.dart';
 import 'package:mobile/screens/playlists_screen.dart';
 import '../data/theme/colors.dart';
-
 
 class SentimentsScreen extends StatelessWidget {
   const SentimentsScreen({super.key});
@@ -41,13 +39,10 @@ class SentimentsScreen extends StatelessWidget {
                     children: allSentiments[category]!.map((sentiment) {
                       return GestureDetector(
                         onTap: () {
-                          final filteredPlaylists = allPlaylists
-                              .where((p) => p.mood == sentiment)
-                              .toList();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => PlaylistsScreen(playlists: filteredPlaylists),
+                              builder: (context) => PlaylistsScreen(mood: sentiment),
                             ),
                           );
                         },
@@ -55,9 +50,8 @@ class SentimentsScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: AppColors.card,
                             borderRadius: BorderRadius.circular(30.0),
-                            // Adicionando a borda
                             border: Border.all(
-                              color: AppColors.accent.withOpacity(0.3), // Borda de cor cinza claro
+                              color: AppColors.accent.withOpacity(0.3),
                               width: 1.0,
                             ),
                           ),

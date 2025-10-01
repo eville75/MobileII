@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/screens/sentiments_screen.dart';
 import '../data/theme/colors.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
