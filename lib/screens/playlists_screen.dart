@@ -1,5 +1,6 @@
 // lib/screens/playlists_screen.dart
 import 'package:flutter/material.dart';
+import 'package:mobile/data/history_data.dart';
 import 'package:mobile/models/playlist_model.dart';
 import '../data/theme/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,7 +17,6 @@ class PlaylistsScreen extends StatefulWidget {
 }
 
 class _PlaylistsScreenState extends State<PlaylistsScreen> {
-  // ALTERADO: Lógica de estado para rolagem infinita
   final String _youtubeApiKey = "AIzaSyDrafrqNdnxdjbnJHGwYGuZWAt1adaqokw";
   final List<Playlist> _playlists = [];
   final ScrollController _scrollController = ScrollController();
@@ -28,8 +28,8 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchPlaylists(); // Busca a primeira página
-    _scrollController.addListener(_onScroll); // Adiciona o listener para a rolagem
+    _fetchPlaylists();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -40,11 +40,10 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   }
 
   void _onScroll() {
-    // Se o usuário está perto do fim da lista, não estamos carregando e ainda há mais playlists...
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300 &&
         !_isLoading &&
         _hasMore) {
-      _fetchPlaylists(); // ...buscamos a próxima página.
+      _fetchPlaylists();
     }
   }
 
@@ -86,17 +85,20 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         throw Exception('Erro ao carregar as playlists');
       }
     } catch (e) {
-      // Tratar erro, se necessário
+      // Tratar erro
     } finally {
       setState(() {
         _isLoading = false;
       });
     }
   }
-
-  Future<void> _launchUrl(String url) async {
-    if (!await launchUrl(Uri.parse(url))) {
-      throw Exception('Não foi possível abrir a URL: $url');
+  
+  Future<void> _handlePlaylistTap(Playlist playlist) async {
+    playlistHistory.removeWhere((p) => p.url == playlist.url);
+    playlistHistory.insert(0, playlist);
+    
+    if (!await launchUrl(Uri.parse(playlist.url))) {
+      throw Exception('Não foi possível abrir a URL: ${playlist.url}');
     }
   }
 
@@ -105,7 +107,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Fundo (mantido)
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -132,46 +133,45 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             ),
           ),
           
-          // ALTERADO: Lida com o carregamento inicial
           if (_isInitialLoad && _isLoading)
             const Center(child: CircularProgressIndicator(color: AppColors.primary)),
             
-          // Conteúdo principal
           SafeArea(
             child: CustomScrollView(
-              controller: _scrollController, // Conecta o controller
+              controller: _scrollController,
               slivers: [
                 SliverAppBar(
-                  backgroundColor: Colors.transparent,
+                  // ----- INÍCIO DA CORREÇÃO -----
+                  backgroundColor: AppColors.background,
                   elevation: 0,
-                  centerTitle: false,
                   pinned: true,
                   expandedHeight: 120,
+                  // O FlexibleSpaceBar agora controla o título em todos os estados
                   flexibleSpace: FlexibleSpaceBar(
-                    titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     title: Text(
                       widget.mood,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
-                      textAlign: TextAlign.left,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.text),
                     ),
-                    centerTitle: false,
+                    centerTitle: true, // Centraliza o título quando a barra encolhe
+                    titlePadding: const EdgeInsets.only(bottom: 16.0), // Ajusta o padding
                   ),
+                   // ----- FIM DA CORREÇÃO -----
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 0),
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      // ALTERADO: Cards menores
-                      crossAxisCount: 3, // 3 colunas
+                      crossAxisCount: 3,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      childAspectRatio: 0.75, // Proporção altura/largura
+                      childAspectRatio: 0.75,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
+                        final playlist = _playlists[index];
                         return PlaylistCard(
-                          playlist: _playlists[index],
-                          onTap: () => _launchUrl(_playlists[index].url),
+                          playlist: playlist,
+                          onTap: () => _handlePlaylistTap(playlist),
                         );
                       },
                       childCount: _playlists.length,
@@ -179,7 +179,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                   ),
                 ),
 
-                // NOVO: Indicador de carregamento no final da lista
                 if (_isLoading && !_isInitialLoad)
                   const SliverToBoxAdapter(
                     child: Padding(
@@ -198,7 +197,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   }
 }
 
-
+// O widget PlaylistCard continua o mesmo
 class PlaylistCard extends StatelessWidget {
   final Playlist playlist;
   final VoidCallback onTap;
@@ -210,42 +209,47 @@ class PlaylistCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12), // Raio um pouco menor
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.network(
-              playlist.thumbnailUrl!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(color: AppColors.accent),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
-                  stops: const [0.6, 1.0],
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.glassBorder.withOpacity(0.5), width: 1.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.network(
+                playlist.thumbnailUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(color: AppColors.accent),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
+                    stops: const [0.6, 1.0],
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 8,
-              left: 8,
-              right: 8,
-              child: Text(
-                playlist.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  // ALTERADO: Fonte menor para o card menor
-                  fontSize: 11,
+              Positioned(
+                bottom: 8,
+                left: 8,
+                right: 8,
+                child: Text(
+                  playlist.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
