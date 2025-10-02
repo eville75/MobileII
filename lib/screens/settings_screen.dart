@@ -1,7 +1,9 @@
 // lib/screens/settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:mobile/data/history_data.dart';
-import 'package:mobile/data/theme/colors.dart';
+import 'package:mobile/design_system/theme/app_colors.dart';
+import 'package:mobile/design_system/theme/app_spacing.dart';
+import 'package:mobile/design_system/theme/app_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -12,7 +14,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // Função para abrir a URL, pois o histórico também será clicável
   Future<void> _launchUrl(String url) async {
     if (!await launchUrl(Uri.parse(url))) {
       throw Exception('Não foi possível abrir a URL: $url');
@@ -29,31 +30,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         elevation: 0,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(AppSpacing.medium),
         children: [
-          const Text(
-            'Histórico de Playlists',
-            style: TextStyle(
-              color: AppColors.text,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
+          const Text('Histórico de Playlists', style: AppTypography.h2),
+          const SizedBox(height: AppSpacing.small),
           const Text(
             'As playlists que você acessou recentemente.',
-            style: TextStyle(color: AppColors.accent, fontSize: 14),
+            style: AppTypography.body,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.large),
           
           if (playlistHistory.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40.0),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.extraLarge),
               child: Center(
                 child: Text(
                   'Você ainda não acessou\nnenhuma playlist.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.accent.withOpacity(0.7), fontSize: 16),
+                  style: AppTypography.body.copyWith(color: AppColors.accent.withOpacity(0.7)),
                 ),
               ),
             )
@@ -75,7 +69,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  title: Text(playlist.name, style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.bold)),
+                  title: Text(playlist.name, style: AppTypography.componentTitle),
                   subtitle: Text(playlist.mood, style: const TextStyle(color: AppColors.accent)),
                   onTap: () => _launchUrl(playlist.url),
                 ),
@@ -84,18 +78,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           
           const Divider(height: 60, color: AppColors.accent),
 
-          const Text(
-            'Sobre o App',
-            style: TextStyle(
-              color: AppColors.text,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
+          const Text('Sobre o App', style: AppTypography.h2),
+          const SizedBox(height: AppSpacing.medium),
           Text(
             'Mood Mixer v1.1 - Aurora Edition.\nDesenvolvido com Flutter para encontrar a trilha sonora perfeita para cada momento.',
-            style: TextStyle(color: AppColors.accent.withOpacity(0.8)),
+            style: AppTypography.body.copyWith(color: AppColors.accent.withOpacity(0.8)),
           ),
         ],
       ),

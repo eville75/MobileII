@@ -1,8 +1,9 @@
 // lib/screens/playlists_screen.dart
 import 'package:flutter/material.dart';
 import 'package:mobile/data/history_data.dart';
+import 'package:mobile/design_system/widgets/playlist_card.dart'; // <-- ATUALIZADO
 import 'package:mobile/models/playlist_model.dart';
-import '../data/theme/colors.dart';
+import 'package:mobile/design_system/theme/app_colors.dart'; // <-- ATUALIZADO
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'dart:ui';
@@ -17,6 +18,7 @@ class PlaylistsScreen extends StatefulWidget {
 }
 
 class _PlaylistsScreenState extends State<PlaylistsScreen> {
+  // ... (toda a lógica de busca continua a mesma)
   final String _youtubeApiKey = "AIzaSyDrafrqNdnxdjbnJHGwYGuZWAt1adaqokw";
   final List<Playlist> _playlists = [];
   final ScrollController _scrollController = ScrollController();
@@ -49,20 +51,13 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
   Future<void> _fetchPlaylists() async {
     if (_isLoading || !_hasMore) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    String url =
-        'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${widget.mood}+playlist&type=playlist&key=$_youtubeApiKey';
+    setState(() { _isLoading = true; });
+    String url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${widget.mood}+playlist&type=playlist&key=$_youtubeApiKey';
     if (_nextPageToken != null) {
       url += '&pageToken=$_nextPageToken';
     }
-
     try {
       final response = await http.get(Uri.parse(url));
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final List<dynamic> items = data['items'];
@@ -74,29 +69,21 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             thumbnailUrl: item['snippet']['thumbnails']['high']['url'],
           );
         }).toList();
-
         setState(() {
           _playlists.addAll(newPlaylists);
           _nextPageToken = data['nextPageToken'];
           _hasMore = _nextPageToken != null;
           _isInitialLoad = false;
         });
-      } else {
-        throw Exception('Erro ao carregar as playlists');
-      }
+      } else { throw Exception('Erro ao carregar as playlists'); }
     } catch (e) {
       // Tratar erro
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    } finally { setState(() { _isLoading = false; }); }
   }
   
   Future<void> _handlePlaylistTap(Playlist playlist) async {
     playlistHistory.removeWhere((p) => p.url == playlist.url);
     playlistHistory.insert(0, playlist);
-    
     if (!await launchUrl(Uri.parse(playlist.url))) {
       throw Exception('Não foi possível abrir a URL: ${playlist.url}');
     }
@@ -104,7 +91,8 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // ... (O build continua o mesmo, pois já importava o componente)
+     return Scaffold(
       body: Stack(
         children: [
           Container(
@@ -141,21 +129,18 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
               controller: _scrollController,
               slivers: [
                 SliverAppBar(
-                  // ----- INÍCIO DA CORREÇÃO -----
                   backgroundColor: AppColors.background,
                   elevation: 0,
                   pinned: true,
                   expandedHeight: 120,
-                  // O FlexibleSpaceBar agora controla o título em todos os estados
                   flexibleSpace: FlexibleSpaceBar(
                     title: Text(
                       widget.mood,
                       style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.text),
                     ),
-                    centerTitle: true, // Centraliza o título quando a barra encolhe
-                    titlePadding: const EdgeInsets.only(bottom: 16.0), // Ajusta o padding
+                    centerTitle: true,
+                    titlePadding: const EdgeInsets.only(bottom: 16.0),
                   ),
-                   // ----- FIM DA CORREÇÃO -----
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 0),
@@ -192,65 +177,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// O widget PlaylistCard continua o mesmo
-class PlaylistCard extends StatelessWidget {
-  final Playlist playlist;
-  final VoidCallback onTap;
-
-  const PlaylistCard({super.key, required this.playlist, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.glassBorder.withOpacity(0.5), width: 1.5),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                playlist.thumbnailUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(color: AppColors.accent),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
-                    stops: const [0.6, 1.0],
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 8,
-                left: 8,
-                right: 8,
-                child: Text(
-                  playlist.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

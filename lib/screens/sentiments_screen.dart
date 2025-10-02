@@ -2,8 +2,11 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:mobile/data/sentiment_data.dart';
+import 'package:mobile/design_system/theme/app_colors.dart';
+import 'package:mobile/design_system/theme/app_spacing.dart';
+import 'package:mobile/design_system/theme/app_typography.dart';
+import 'package:mobile/design_system/widgets/sentiment_bubble.dart';
 import 'package:mobile/screens/playlists_screen.dart';
-import '../data/theme/colors.dart';
 import 'package:mobile/screens/settings_screen.dart';
 
 class SentimentsScreen extends StatelessWidget {
@@ -20,7 +23,6 @@ class SentimentsScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Fundo com Gradiente e Efeito Aurora
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -46,25 +48,19 @@ class SentimentsScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // Conteúdo da Tela
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.large),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.extraLarge),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         'Como você se\nsente agora?',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.text,
-                        ),
+                        style: AppTypography.h1,
                       ),
                       IconButton(
                         icon: const Icon(Icons.settings_outlined, color: AppColors.accent, size: 28),
@@ -77,28 +73,24 @@ class SentimentsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.medium),
                   const Text(
                     'Toque em um sentimento para encontrar a playlist perfeita.',
-                    style: TextStyle(fontSize: 16, color: AppColors.accent),
+                    style: AppTypography.body,
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.extraLarge),
                   ...allSentiments.keys.map((category) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           category,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.text,
-                          ),
+                          style: AppTypography.h2.copyWith(fontSize: 20),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.medium + 4),
                         Wrap(
-                          spacing: 12.0,
-                          runSpacing: 12.0,
+                          spacing: AppSpacing.medium,
+                          runSpacing: AppSpacing.medium,
                           children: allSentiments[category]!.map((sentiment) {
                             return SentimentBubble(
                               sentiment: sentiment,
@@ -114,7 +106,7 @@ class SentimentsScreen extends StatelessWidget {
                             );
                           }).toList(),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: AppSpacing.extraLarge),
                       ],
                     );
                   }).toList(),
@@ -123,49 +115,6 @@ class SentimentsScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// Widget customizado para o balão de sentimento com efeito de vidro
-class SentimentBubble extends StatelessWidget {
-  final String sentiment;
-  final Color color;
-  final VoidCallback onTap;
-
-  const SentimentBubble({
-    super.key,
-    required this.sentiment,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-            decoration: BoxDecoration(
-              color: AppColors.glassEffect,
-              borderRadius: BorderRadius.circular(30.0),
-              border: Border.all(color: AppColors.glassBorder, width: 1.5),
-            ),
-            child: Text(
-              sentiment,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
