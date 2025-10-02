@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/data/history_data.dart';
 import 'package:mobile/data/theme/colors.dart';
-import 'package:mobile/models/playlist_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
