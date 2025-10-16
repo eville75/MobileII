@@ -19,7 +19,7 @@ class DesignSystemScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: AppColors.backgroundEnd,
           elevation: 0,
-          title: const Text('Aurora Design System'),
+          title: const Text('Design System'),
           bottom: const TabBar(
             isScrollable: true,
             indicatorColor: AppColors.primary,
