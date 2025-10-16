@@ -1,5 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:mobile/design_system/design_system_screen.dart';
 import 'package:mobile/design_system/theme/app_theme.dart';
 import 'package:mobile/screens/sentiments_screen.dart';
 
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
       // Mude para DesignSystemScreen() para ver o catálogo
-      home: const SentimentsScreen(), 
+      home: const DesignSystemScreen(), 
     );
   }
 }
