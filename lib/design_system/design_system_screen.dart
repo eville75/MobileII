@@ -217,6 +217,7 @@ class _ColorTile extends StatelessWidget {
   final String? subtitle;
   final String? usage;
 
+  // ignore: unused_element_parameter
   const _ColorTile({required this.color, required this.name, this.subtitle, this.usage});
 
   String get hexCode {
