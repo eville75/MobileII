@@ -1,11 +1,14 @@
 // lib/design_system/design_system_screen.dart
 import 'package:flutter/material.dart';
+import 'package:mobile/design_system/design_system_data.dart';
 import 'package:mobile/design_system/theme/app_colors.dart';
 import 'package:mobile/design_system/theme/app_spacing.dart';
 import 'package:mobile/design_system/theme/app_typography.dart';
 import 'package:mobile/design_system/widgets/playlist_card.dart';
 import 'package:mobile/design_system/widgets/sentiment_bubble.dart';
-import 'package:mobile/models/playlist_model.dart';
+import 'package:mobile/design_system/widgets/viewmodels/playlist_card_viewmodel.dart';
+import 'package:mobile/design_system/widgets/viewmodels/sentiment_bubble_viewmodel.dart';
+import 'package:mobile/models/playlist_model.dart'; 
 
 class DesignSystemScreen extends StatelessWidget {
   const DesignSystemScreen({super.key});
@@ -13,18 +16,19 @@ class DesignSystemScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 4, // <-- Mudado de 5 para 4 abas
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
           backgroundColor: AppColors.backgroundEnd,
           elevation: 0,
-          title: const Text('Design System'),
+          title: const Text('Pulso - Design System'),
           bottom: const TabBar(
             isScrollable: true,
             indicatorColor: AppColors.primary,
             indicatorWeight: 3.0,
             tabs: [
+              // Aba 'Marca' REMOVIDA
               Tab(text: 'Cores'),
               Tab(text: 'Tipografia'),
               Tab(text: 'Espaçamentos'),
@@ -34,6 +38,7 @@ class DesignSystemScreen extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
+            // _buildBrandingView() REMOVIDA
             _buildColorsView(),
             _buildTypographyView(),
             _buildSpacingView(),
@@ -44,6 +49,9 @@ class DesignSystemScreen extends StatelessWidget {
     );
   }
 
+  // A função _buildBrandingView() foi REMOVIDA daqui.
+
+  // 1. Conteúdo da Aba CORES (Antigo 2)
   Widget _buildColorsView() {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.medium),
@@ -75,9 +83,7 @@ class DesignSystemScreen extends StatelessWidget {
           name: 'Background End',
           usage: 'Cor final para gradientes de fundo, criando profundidade.',
         ),
-        
         Divider(height: AppSpacing.extraLarge, color: AppColors.accent),
-
         Text('Efeitos e Transparências', style: AppTypography.h2),
         SizedBox(height: AppSpacing.medium),
         _ColorTile(
@@ -90,9 +96,7 @@ class DesignSystemScreen extends StatelessWidget {
           name: 'Glass Border',
           usage: 'Borda para componentes com efeito de vidro fosco.',
         ),
-
         Divider(height: AppSpacing.extraLarge, color: AppColors.accent),
-
         Text('Cores Semânticas', style: AppTypography.h2),
         SizedBox(height: AppSpacing.medium),
         _ColorTile(
@@ -113,7 +117,8 @@ class DesignSystemScreen extends StatelessWidget {
       ],
     );
   }
-  
+
+  // 2. Conteúdo da Aba TIPOGRAFIA (Antigo 3)
   Widget _buildTypographyView() {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.medium),
@@ -142,6 +147,7 @@ class DesignSystemScreen extends StatelessWidget {
     );
   }
 
+  // 3. Conteúdo da Aba ESPAÇAMENTOS (Antigo 4)
   Widget _buildSpacingView() {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.medium),
@@ -173,14 +179,12 @@ class DesignSystemScreen extends StatelessWidget {
       ],
     );
   }
-  
+
+  // 4. Conteúdo da Aba COMPONENTES (Antigo 5)
   Widget _buildComponentsView() {
-    final mockPlaylist = Playlist(
-      name: 'Nome da Playlist de Exemplo para Teste de Quebra de Linha',
-      mood: 'Sentimento',
-      url: '#',
-      thumbnailUrl: 'https://i.scdn.co/image/ab67616d0000b273b2592bea12d72421c27942f2',
-    );
+    // Pega os dados mockados do nosso arquivo de "ViewModel de dados"
+    final mockPlaylistModel = DesignSystemData.mockPlaylist;
+    final mockSentimentData = DesignSystemData.mockSentiments;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.medium),
@@ -191,11 +195,19 @@ class DesignSystemScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.medium),
           Wrap(
             spacing: AppSpacing.medium,
-            children: [
-              SentimentBubble(sentiment: 'Positivo', color: AppColors.positive, onTap: () {}),
-              SentimentBubble(sentiment: 'Negativo', color: AppColors.negative, onTap: () {}),
-              SentimentBubble(sentiment: 'Neutro', color: AppColors.neutral, onTap: () {}),
-            ],
+            children: mockSentimentData.map((sentimentData) {
+              // Converte os dados mockados em ViewModel
+              Color color = AppColors.neutral;
+              if (sentimentData['type'] == 'positive') color = AppColors.positive;
+              if (sentimentData['type'] == 'negative') color = AppColors.negative;
+
+              final viewModel = SentimentBubbleViewModel(
+                sentiment: sentimentData['label']!,
+                color: color,
+              );
+              
+              return SentimentBubble(viewModel: viewModel, onTap: () {});
+            }).toList(),
           ),
           const Divider(height: AppSpacing.extraLarge),
           const Text('Playlist Card', style: AppTypography.h2),
@@ -203,7 +215,14 @@ class DesignSystemScreen extends StatelessWidget {
           SizedBox(
             width: 150,
             height: 200,
-            child: PlaylistCard(playlist: mockPlaylist, onTap: () {}),
+            // Converte o Model mockado em ViewModel
+            child: PlaylistCard(
+              viewModel: PlaylistCardViewModel(
+                name: mockPlaylistModel.name,
+                thumbnailUrl: mockPlaylistModel.thumbnailUrl!,
+              ),
+              onTap: () {},
+            ),
           ),
         ],
       ),
@@ -211,13 +230,14 @@ class DesignSystemScreen extends StatelessWidget {
   }
 }
 
+// WIDGETS AUXILIARES COMPLETOS (Não mude nada aqui, apenas ajustei a ordem no código para corresponder às funções de build)
+
 class _ColorTile extends StatelessWidget {
   final Color color;
   final String name;
   final String? subtitle;
   final String? usage;
 
-  // ignore: unused_element_parameter
   const _ColorTile({required this.color, required this.name, this.subtitle, this.usage});
 
   String get hexCode {

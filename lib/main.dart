@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
       // Mude para DesignSystemScreen() para ver o catálogo
-      home: const DesignSystemScreen(), 
+      home: const SentimentsScreen(), 
     );
   }
 }
