@@ -1,9 +1,10 @@
 // lib/screens/playlists_screen.dart
 import 'package:flutter/material.dart';
 import 'package:mobile/data/history_data.dart';
-import 'package:mobile/design_system/widgets/playlist_card.dart'; // <-- ATUALIZADO
+import 'package:mobile/design_system/widgets/playlist_card.dart';
+import 'package:mobile/design_system/widgets/viewmodels/playlist_card_viewmodel.dart'; // IMPORTA O VIEWMODEL
 import 'package:mobile/models/playlist_model.dart';
-import 'package:mobile/design_system/theme/app_colors.dart'; // <-- ATUALIZADO
+import 'package:mobile/design_system/theme/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'dart:ui';
@@ -18,44 +19,23 @@ class PlaylistsScreen extends StatefulWidget {
 }
 
 class _PlaylistsScreenState extends State<PlaylistsScreen> {
-  // ... (toda a lógica de busca continua a mesma)
   final String _youtubeApiKey = "AIzaSyDrafrqNdnxdjbnJHGwYGuZWAt1adaqokw";
-  final List<Playlist> _playlists = [];
+  final List<Playlist> _playlists = []; // A tela ainda gerencia o MODEL
   final ScrollController _scrollController = ScrollController();
   String? _nextPageToken;
   bool _isLoading = false;
   bool _hasMore = true;
   bool _isInitialLoad = true;
-
   @override
-  void initState() {
-    super.initState();
-    _fetchPlaylists();
-    _scrollController.addListener(_onScroll);
-  }
-
+  void initState() { super.initState(); _fetchPlaylists(); _scrollController.addListener(_onScroll); }
   @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300 &&
-        !_isLoading &&
-        _hasMore) {
-      _fetchPlaylists();
-    }
-  }
-
+  void dispose() { _scrollController.removeListener(_onScroll); _scrollController.dispose(); super.dispose(); }
+  void _onScroll() { if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300 && !_isLoading && _hasMore) { _fetchPlaylists(); } }
   Future<void> _fetchPlaylists() async {
     if (_isLoading || !_hasMore) return;
     setState(() { _isLoading = true; });
     String url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${widget.mood}+playlist&type=playlist&key=$_youtubeApiKey';
-    if (_nextPageToken != null) {
-      url += '&pageToken=$_nextPageToken';
-    }
+    if (_nextPageToken != null) { url += '&pageToken=$_nextPageToken'; }
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -69,29 +49,19 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             thumbnailUrl: item['snippet']['thumbnails']['high']['url'],
           );
         }).toList();
-        setState(() {
-          _playlists.addAll(newPlaylists);
-          _nextPageToken = data['nextPageToken'];
-          _hasMore = _nextPageToken != null;
-          _isInitialLoad = false;
-        });
+        setState(() { _playlists.addAll(newPlaylists); _nextPageToken = data['nextPageToken']; _hasMore = _nextPageToken != null; _isInitialLoad = false; });
       } else { throw Exception('Erro ao carregar as playlists'); }
-    } catch (e) {
-      // Tratar erro
-    } finally { setState(() { _isLoading = false; }); }
+    } catch (e) { /* Tratar erro */ } 
+    finally { setState(() { _isLoading = false; }); }
   }
-  
   Future<void> _handlePlaylistTap(Playlist playlist) async {
     playlistHistory.removeWhere((p) => p.url == playlist.url);
     playlistHistory.insert(0, playlist);
-    if (!await launchUrl(Uri.parse(playlist.url))) {
-      throw Exception('Não foi possível abrir a URL: ${playlist.url}');
-    }
+    if (!await launchUrl(Uri.parse(playlist.url))) { throw Exception('Não foi possível abrir a URL: ${playlist.url}'); }
   }
 
   @override
   Widget build(BuildContext context) {
-    // ... (O build continua o mesmo, pois já importava o componente)
      return Scaffold(
       body: Stack(
         children: [
@@ -120,7 +90,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
               ),
             ),
           ),
-          
           if (_isInitialLoad && _isLoading)
             const Center(child: CircularProgressIndicator(color: AppColors.primary)),
             
@@ -153,9 +122,17 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final playlist = _playlists[index];
+                        final playlist = _playlists[index]; // 1. Pega o Model
+
+                        // 2. Converte o Model para o ViewModel
+                        final cardViewModel = PlaylistCardViewModel(
+                          name: playlist.name,
+                          thumbnailUrl: playlist.thumbnailUrl!,
+                        );
+
+                        // 3. Passa o ViewModel para o widget
                         return PlaylistCard(
-                          playlist: playlist,
+                          viewModel: cardViewModel, // PASSA O VIEWMODEL
                           onTap: () => _handlePlaylistTap(playlist),
                         );
                       },
@@ -163,7 +140,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                     ),
                   ),
                 ),
-
                 if (_isLoading && !_isInitialLoad)
                   const SliverToBoxAdapter(
                     child: Padding(
@@ -171,7 +147,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                       child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
                     ),
                   ),
-
                 SliverToBoxAdapter(child: const SizedBox(height: 40)),
               ],
             ),

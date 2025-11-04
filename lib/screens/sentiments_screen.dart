@@ -6,6 +6,7 @@ import 'package:mobile/design_system/theme/app_colors.dart';
 import 'package:mobile/design_system/theme/app_spacing.dart';
 import 'package:mobile/design_system/theme/app_typography.dart';
 import 'package:mobile/design_system/widgets/sentiment_bubble.dart';
+import 'package:mobile/design_system/widgets/viewmodels/sentiment_bubble_viewmodel.dart'; 
 import 'package:mobile/screens/playlists_screen.dart';
 import 'package:mobile/screens/settings_screen.dart';
 
@@ -23,6 +24,7 @@ class SentimentsScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          // Fundo (sem alteração)
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -54,15 +56,14 @@ class SentimentsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: AppSpacing.extraLarge),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Como você se\nsente agora?',
-                        style: AppTypography.h1,
-                      ),
-                      IconButton(
+                  // ----- INÍCIO DA CORREÇÃO -----
+                  // Seção da logo foi REMOVIDA
+                  // O botão de configurações foi movido para o topo
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.medium),
+                      child: IconButton(
                         icon: const Icon(Icons.settings_outlined, color: AppColors.accent, size: 28),
                         onPressed: () {
                           Navigator.push(
@@ -71,14 +72,20 @@ class SentimentsScreen extends StatelessWidget {
                           );
                         },
                       ),
-                    ],
+                    ),
                   ),
+                  const SizedBox(height: AppSpacing.medium), // Espaço ajustado
+                  // ----- FIM DA CORREÇÃO -----
+
+                  const Text('Como você se\nsente agora?', style: AppTypography.h1),
                   const SizedBox(height: AppSpacing.medium),
                   const Text(
                     'Toque em um sentimento para encontrar a playlist perfeita.',
                     style: AppTypography.body,
                   ),
                   const SizedBox(height: AppSpacing.extraLarge),
+                  
+                  // O resto do código (seções de sentimentos) continua o mesmo
                   ...allSentiments.keys.map((category) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,9 +99,15 @@ class SentimentsScreen extends StatelessWidget {
                           spacing: AppSpacing.medium,
                           runSpacing: AppSpacing.medium,
                           children: allSentiments[category]!.map((sentiment) {
-                            return SentimentBubble(
+                            final color = getBubbleColor(category);
+
+                            final viewModel = SentimentBubbleViewModel(
                               sentiment: sentiment,
-                              color: getBubbleColor(category),
+                              color: color,
+                            );
+
+                            return SentimentBubble(
+                              viewModel: viewModel,
                               onTap: () {
                                 Navigator.push(
                                   context,

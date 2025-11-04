@@ -1,9 +1,11 @@
 // lib/screens/settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:mobile/data/history_data.dart';
+import 'package:mobile/design_system/design_system_screen.dart'; // Importa a tela do DS
 import 'package:mobile/design_system/theme/app_colors.dart';
 import 'package:mobile/design_system/theme/app_spacing.dart';
 import 'package:mobile/design_system/theme/app_typography.dart';
+import 'package:mobile/models/playlist_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -76,12 +78,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             }).toList(),
           
-          const Divider(height: 60, color: AppColors.accent),
+          const Divider(height: AppSpacing.extraLarge, color: AppColors.accent),
+
+          // BOTÃO PARA O DESIGN SYSTEM
+          ListTile(
+            leading: const Icon(Icons.palette_outlined, color: AppColors.accent),
+            title: Text('Visualizar Design System', style: AppTypography.body.copyWith(color: AppColors.text)),
+            subtitle: Text('Documentação de componentes e estilos', style: TextStyle(color: AppColors.accent.withOpacity(0.7))),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DesignSystemScreen()),
+              );
+            },
+          ),
+          // FIM DO BOTÃO
+
+          const Divider(height: AppSpacing.extraLarge, color: AppColors.accent),
 
           const Text('Sobre o App', style: AppTypography.h2),
           const SizedBox(height: AppSpacing.medium),
           Text(
-            'Mood Mixer v1.1 - Aurora Edition.\nDesenvolvido com Flutter para encontrar a trilha sonora perfeita para cada momento.',
+            'Pulso v1.0 - Aurora Edition.\nDesenvolvido com Flutter para encontrar a trilha sonora perfeita para cada momento.',
             style: AppTypography.body.copyWith(color: AppColors.accent.withOpacity(0.8)),
           ),
         ],

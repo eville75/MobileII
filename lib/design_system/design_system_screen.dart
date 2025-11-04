@@ -1,11 +1,14 @@
 // lib/design_system/design_system_screen.dart
 import 'package:flutter/material.dart';
+import 'package:mobile/design_system/design_system_data.dart';
 import 'package:mobile/design_system/theme/app_colors.dart';
 import 'package:mobile/design_system/theme/app_spacing.dart';
 import 'package:mobile/design_system/theme/app_typography.dart';
 import 'package:mobile/design_system/widgets/playlist_card.dart';
 import 'package:mobile/design_system/widgets/sentiment_bubble.dart';
-import 'package:mobile/models/playlist_model.dart';
+import 'package:mobile/design_system/widgets/viewmodels/playlist_card_viewmodel.dart';
+import 'package:mobile/design_system/widgets/viewmodels/sentiment_bubble_viewmodel.dart';
+import 'package:mobile/models/playlist_model.dart'; 
 
 class DesignSystemScreen extends StatelessWidget {
   const DesignSystemScreen({super.key});
@@ -13,27 +16,32 @@ class DesignSystemScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4, // <-- Mudado de 5 para 4 abas
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
           backgroundColor: AppColors.backgroundEnd,
           elevation: 0,
-          title: const Text('Aurora Design System'),
+          title: const Text('Pulso - Design System'),
           bottom: const TabBar(
+            isScrollable: true,
             indicatorColor: AppColors.primary,
             indicatorWeight: 3.0,
             tabs: [
+              // Aba 'Marca' REMOVIDA
               Tab(text: 'Cores'),
               Tab(text: 'Tipografia'),
+              Tab(text: 'Espaçamentos'),
               Tab(text: 'Componentes'),
             ],
           ),
         ),
         body: TabBarView(
           children: [
+            // _buildBrandingView() REMOVIDA
             _buildColorsView(),
             _buildTypographyView(),
+            _buildSpacingView(),
             _buildComponentsView(),
           ],
         ),
@@ -41,47 +49,142 @@ class DesignSystemScreen extends StatelessWidget {
     );
   }
 
+  // A função _buildBrandingView() foi REMOVIDA daqui.
+
+  // 1. Conteúdo da Aba CORES (Antigo 2)
   Widget _buildColorsView() {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.medium),
       children: const [
-        _ColorTile(color: AppColors.background, name: 'Background'),
-        _ColorTile(color: AppColors.backgroundEnd, name: 'Background End'),
-        _ColorTile(color: AppColors.primary, name: 'Primary'),
-        _ColorTile(color: AppColors.accent, name: 'Accent'),
-        _ColorTile(color: AppColors.text, name: 'Text'),
-        _ColorTile(color: AppColors.glassEffect, name: 'Glass Effect'),
-        _ColorTile(color: AppColors.glassBorder, name: 'Glass Border'),
-        _ColorTile(color: AppColors.positive, name: 'Positive'),
-        _ColorTile(color: AppColors.negative, name: 'Negative'),
+        Text('Paleta Principal', style: AppTypography.h2),
+        SizedBox(height: AppSpacing.medium),
+        _ColorTile(
+          color: AppColors.primary,
+          name: 'Primary',
+          usage: 'Botões principais, links, ícones ativos e indicadores.',
+        ),
+        _ColorTile(
+          color: AppColors.accent,
+          name: 'Accent',
+          usage: 'Textos secundários, ícones inativos e bordas sutis.',
+        ),
+        _ColorTile(
+          color: AppColors.text,
+          name: 'Text',
+          usage: 'Cor principal para todos os textos sobre fundos escuros.',
+        ),
+        _ColorTile(
+          color: AppColors.background,
+          name: 'Background',
+          usage: 'Cor de fundo principal e base para a maioria das telas.',
+        ),
+        _ColorTile(
+          color: AppColors.backgroundEnd,
+          name: 'Background End',
+          usage: 'Cor final para gradientes de fundo, criando profundidade.',
+        ),
+        Divider(height: AppSpacing.extraLarge, color: AppColors.accent),
+        Text('Efeitos e Transparências', style: AppTypography.h2),
+        SizedBox(height: AppSpacing.medium),
+        _ColorTile(
+          color: AppColors.glassEffect,
+          name: 'Glass Effect',
+          usage: 'Fundo para componentes com efeito de vidro fosco.',
+        ),
+        _ColorTile(
+          color: AppColors.glassBorder,
+          name: 'Glass Border',
+          usage: 'Borda para componentes com efeito de vidro fosco.',
+        ),
+        Divider(height: AppSpacing.extraLarge, color: AppColors.accent),
+        Text('Cores Semânticas', style: AppTypography.h2),
+        SizedBox(height: AppSpacing.medium),
+        _ColorTile(
+          color: AppColors.positive,
+          name: 'Positive',
+          usage: 'Representa sucesso ou sentimentos positivos. (Alias para Primary)',
+        ),
+        _ColorTile(
+          color: AppColors.negative,
+          name: 'Negative (Error)',
+          usage: 'Representa erro, perigo ou sentimentos negativos.',
+        ),
+        _ColorTile(
+          color: AppColors.neutral,
+          name: 'Neutral',
+          usage: 'Representa estado neutro ou informativo. (Alias para Accent)',
+        ),
       ],
     );
   }
 
+  // 2. Conteúdo da Aba TIPOGRAFIA (Antigo 3)
   Widget _buildTypographyView() {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.medium),
       children: const [
-        Text('H1 - Como você se sente agora?', style: AppTypography.h1),
-        Divider(height: AppSpacing.large),
-        Text('H2 - Histórico de Playlists', style: AppTypography.h2),
-        Divider(height: AppSpacing.large),
-        Text(
-            'Body - Toque em um sentimento para encontrar a playlist perfeita.',
-            style: AppTypography.body),
-        Divider(height: AppSpacing.large),
-        Text('Component Title - Alegria', style: AppTypography.componentTitle),
+        _TypographyTile(
+          name: 'H1',
+          style: AppTypography.h1,
+          exampleText: 'Como você se sente agora?',
+        ),
+        _TypographyTile(
+          name: 'H2',
+          style: AppTypography.h2,
+          exampleText: 'Histórico de Playlists',
+        ),
+        _TypographyTile(
+          name: 'Body',
+          style: AppTypography.body,
+          exampleText: 'Toque em um sentimento para encontrar a playlist perfeita.',
+        ),
+        _TypographyTile(
+          name: 'Component Title',
+          style: AppTypography.componentTitle,
+          exampleText: 'Alegria',
+        ),
       ],
     );
   }
 
-  Widget _buildComponentsView() {
-    final mockPlaylist = Playlist(
-      name: 'Nome da Playlist de Exemplo para Teste de Quebra de Linha',
-      mood: 'Sentimento',
-      url: '#',
-      thumbnailUrl: 'https://i.scdn.co/image/ab67616d0000b273b2592bea12d72421c27942f2',
+  // 3. Conteúdo da Aba ESPAÇAMENTOS (Antigo 4)
+  Widget _buildSpacingView() {
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.medium),
+      children: const [
+        _SpacingTile(
+          name: 'Small',
+          size: AppSpacing.small,
+          concept: 'Agrupador',
+          description: 'Use para conectar elementos que devem ser lidos como uma única unidade (ex: título e subtítulo).',
+        ),
+        _SpacingTile(
+          name: 'Medium',
+          size: AppSpacing.medium,
+          concept: 'Separador Padrão',
+          description: 'O espaço mais comum. Use entre itens distintos, como os cards em uma lista ou os bubbles de sentimento.',
+        ),
+        _SpacingTile(
+          name: 'Large',
+          size: AppSpacing.large,
+          concept: 'Separador de Seções',
+          description: 'Use para criar uma divisão clara entre grandes blocos de conteúdo e como padding principal da tela.',
+        ),
+        _SpacingTile(
+          name: 'Extra Large',
+          size: AppSpacing.extraLarge,
+          concept: 'Grande Respiro',
+          description: 'Use para os maiores espaços estruturais, geralmente no início ou no fim de uma página.',
+        ),
+      ],
     );
+  }
+
+  // 4. Conteúdo da Aba COMPONENTES (Antigo 5)
+  Widget _buildComponentsView() {
+    // Pega os dados mockados do nosso arquivo de "ViewModel de dados"
+    final mockPlaylistModel = DesignSystemData.mockPlaylist;
+    final mockSentimentData = DesignSystemData.mockSentiments;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.medium),
@@ -92,11 +195,19 @@ class DesignSystemScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.medium),
           Wrap(
             spacing: AppSpacing.medium,
-            children: [
-              SentimentBubble(sentiment: 'Positivo', color: AppColors.positive, onTap: () {}),
-              SentimentBubble(sentiment: 'Negativo', color: AppColors.negative, onTap: () {}),
-              SentimentBubble(sentiment: 'Neutro', color: AppColors.neutral, onTap: () {}),
-            ],
+            children: mockSentimentData.map((sentimentData) {
+              // Converte os dados mockados em ViewModel
+              Color color = AppColors.neutral;
+              if (sentimentData['type'] == 'positive') color = AppColors.positive;
+              if (sentimentData['type'] == 'negative') color = AppColors.negative;
+
+              final viewModel = SentimentBubbleViewModel(
+                sentiment: sentimentData['label']!,
+                color: color,
+              );
+              
+              return SentimentBubble(viewModel: viewModel, onTap: () {});
+            }).toList(),
           ),
           const Divider(height: AppSpacing.extraLarge),
           const Text('Playlist Card', style: AppTypography.h2),
@@ -104,7 +215,14 @@ class DesignSystemScreen extends StatelessWidget {
           SizedBox(
             width: 150,
             height: 200,
-            child: PlaylistCard(playlist: mockPlaylist, onTap: () {}),
+            // Converte o Model mockado em ViewModel
+            child: PlaylistCard(
+              viewModel: PlaylistCardViewModel(
+                name: mockPlaylistModel.name,
+                thumbnailUrl: mockPlaylistModel.thumbnailUrl!,
+              ),
+              onTap: () {},
+            ),
           ),
         ],
       ),
@@ -112,28 +230,150 @@ class DesignSystemScreen extends StatelessWidget {
   }
 }
 
+// WIDGETS AUXILIARES COMPLETOS (Não mude nada aqui, apenas ajustei a ordem no código para corresponder às funções de build)
+
 class _ColorTile extends StatelessWidget {
   final Color color;
   final String name;
-  const _ColorTile({required this.color, required this.name});
+  final String? subtitle;
+  final String? usage;
+
+  const _ColorTile({required this.color, required this.name, this.subtitle, this.usage});
+
+  String get hexCode {
+    return '#${color.value.toRadixString(16).toUpperCase()}';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = color.computeLuminance() < 0.5;
+    final Color textColor = isDark ? Colors.white : Colors.black;
+
     return Card(
       color: color,
-      margin: const EdgeInsets.only(bottom: AppSpacing.small),
+      margin: const EdgeInsets.only(bottom: AppSpacing.medium),
       shape: RoundedRectangleBorder(
           side: BorderSide(color: color == AppColors.background ? AppColors.accent : Colors.transparent),
           borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.medium),
-        child: Text(
-          name,
-          style: TextStyle(
-            color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 4),
+                        Text(subtitle!, style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 12)),
+                      ],
+                    ],
+                  ),
+                ),
+                Text(
+                  hexCode,
+                  style: TextStyle(fontFamily: 'monospace', color: textColor, fontSize: 16),
+                ),
+              ],
+            ),
+            if (usage != null) ...[
+              const Divider(height: AppSpacing.medium, color: Colors.white24),
+              Text(
+                'Uso Prático: ${usage!}',
+                style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 12),
+              ),
+            ],
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class _TypographyTile extends StatelessWidget {
+  final String name;
+  final String exampleText;
+  final TextStyle style;
+  const _TypographyTile({required this.name, required this.style, required this.exampleText});
+
+  String get styleDetails {
+    final size = 'Font Size: ${style.fontSize}';
+    final weight = 'Font Weight: ${style.fontWeight.toString().split('.').last}';
+    return '$size\n$weight';
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.large),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(exampleText, style: style),
+          const SizedBox(height: AppSpacing.small),
+          Text(
+            '$name Details:\n$styleDetails',
+            style: AppTypography.body.copyWith(
+              color: AppColors.accent.withOpacity(0.7),
+              fontSize: 12,
+            ),
+          ),
+           const Divider(height: AppSpacing.large, color: AppColors.accent),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpacingTile extends StatelessWidget {
+  final String name;
+  final String concept;
+  final String description;
+  final double size;
+  const _SpacingTile({required this.name, required this.size, required this.concept, required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.large),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                width: size,
+                height: size,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: AppSpacing.medium),
+              Text(
+                '$name - ${size.toStringAsFixed(1)}px',
+                style: AppTypography.componentTitle,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.medium),
+          Text(
+            'Conceito: "$concept"',
+            style: AppTypography.body.copyWith(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.text),
+          ),
+          const SizedBox(height: AppSpacing.small),
+          Text(
+            description,
+            style: AppTypography.body.copyWith(
+              color: AppColors.accent.withOpacity(0.8),
+              fontSize: 14,
+            ),
+          ),
+          const Divider(height: AppSpacing.large, color: AppColors.accent),
+        ],
       ),
     );
   }

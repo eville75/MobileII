@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:mobile/design_system/theme/app_colors.dart';
 import 'package:mobile/design_system/theme/app_typography.dart';
+// IMPORTA O VIEWMODEL
+import 'package:mobile/design_system/widgets/viewmodels/sentiment_bubble_viewmodel.dart';
 
 class SentimentBubble extends StatelessWidget {
-  final String sentiment;
-  final Color color;
+  final SentimentBubbleViewModel viewModel; // <-- USA O VIEWMODEL
   final VoidCallback onTap;
 
   const SentimentBubble({
     super.key,
-    required this.sentiment,
-    required this.color,
+    required this.viewModel,
     required this.onTap,
   });
 
@@ -32,8 +32,8 @@ class SentimentBubble extends StatelessWidget {
               border: Border.all(color: AppColors.glassBorder, width: 1.5),
             ),
             child: Text(
-              sentiment,
-              style: AppTypography.componentTitle.copyWith(color: color),
+              viewModel.sentiment, // <-- USA O VIEWMODEL
+              style: AppTypography.componentTitle.copyWith(color: viewModel.color), // <-- USA O VIEWMODEL
             ),
           ),
         ),

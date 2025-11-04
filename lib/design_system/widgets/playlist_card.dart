@@ -1,13 +1,14 @@
 // lib/design_system/widgets/playlist_card.dart
 import 'package:flutter/material.dart';
 import 'package:mobile/design_system/theme/app_colors.dart';
-import 'package:mobile/models/playlist_model.dart';
+// IMPORTA O VIEWMODEL
+import 'package:mobile/design_system/widgets/viewmodels/playlist_card_viewmodel.dart'; 
 
 class PlaylistCard extends StatelessWidget {
-  final Playlist playlist;
+  final PlaylistCardViewModel viewModel; // <-- USA O VIEWMODEL
   final VoidCallback onTap;
 
-  const PlaylistCard({super.key, required this.playlist, required this.onTap});
+  const PlaylistCard({super.key, required this.viewModel, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class PlaylistCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               Image.network(
-                playlist.thumbnailUrl!,
+                viewModel.thumbnailUrl, // <-- USA O VIEWMODEL
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(color: AppColors.accent),
               ),
@@ -43,7 +44,7 @@ class PlaylistCard extends StatelessWidget {
                 left: 8,
                 right: 8,
                 child: Text(
-                  playlist.name,
+                  viewModel.name, // <-- USA O VIEWMODEL
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
